@@ -152,7 +152,7 @@
     </div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">Ready. Type a message or drag & drop a file here.</div>
+      <div class="terminal-output" id="terminal-output">ready.</div>
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
         <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
@@ -177,7 +177,8 @@
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
 
-    // Hidden file input element
+    let userContact = localStorage.getItem('visitor_handle') || '';
+
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.style.display = 'none';
@@ -187,7 +188,6 @@
       termInput.focus();
     });
 
-    // Core file upload function
     async function processFile(file, method = "upload") {
       if (!file) return;
 
@@ -204,9 +204,9 @@
         });
 
         if (res.ok) {
-          termOutput.textContent += `\nFile delivered.`;
+          termOutput.textContent += `\nDelivered.`;
         } else {
-          termOutput.textContent += `\nFile failed to send.`;
+          termOutput.textContent += `\nFailed.`;
         }
       } catch (err) {
         termOutput.textContent += `\nNetwork error.`;
@@ -215,13 +215,11 @@
       termOutput.scrollTop = termOutput.scrollHeight;
     }
 
-    // Handle Manual File Selection
     fileInput.addEventListener('change', (e) => {
       processFile(e.target.files[0], "upload");
       fileInput.value = '';
     });
 
-    // Handle Drag & Drop Events
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       window.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -246,7 +244,6 @@
       processFile(file, "drag_and_drop");
     }, false);
 
-    // Handle Text Input
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         const rawVal = termInput.value.trim();
@@ -255,12 +252,20 @@
         termInput.value = '';
 
         if (rawVal.toLowerCase() === 'clear') {
-          termOutput.textContent = 'Ready. Type a message or drag & drop a file here.';
+          termOutput.textContent = 'ready.';
           return;
         }
 
         if (rawVal.toLowerCase() === 'upload') {
           fileInput.click();
+          return;
+        }
+
+        if (rawVal.toLowerCase().startsWith('setcontact ')) {
+          userContact = rawVal.replace(/^setcontact\s+/i, '').trim();
+          localStorage.setItem('visitor_handle', userContact);
+          termOutput.textContent += `\n\n> Contact set to: ${userContact}`;
+          termOutput.scrollTop = termOutput.scrollHeight;
           return;
         }
 
@@ -271,7 +276,10 @@
           const res = await fetch(WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: rawVal })
+            body: JSON.stringify({ 
+              message: rawVal,
+              contact: userContact || "Not provided"
+            })
           });
 
           if (res.ok) {
