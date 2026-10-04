@@ -200,6 +200,7 @@
       termInput.focus();
     });
 
+    // Poll for replies sent from Telegram every 2.5 seconds
     setInterval(async () => {
       try {
         const res = await fetch(`${WORKER_URL}/get-replies?sessionId=${sessionId}`);
