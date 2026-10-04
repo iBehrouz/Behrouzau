@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Behrouz</title>
   <style>
     :root {
@@ -12,14 +13,10 @@
       --text-main: #e0e0e0;
       --text-muted: #888888;
       --border-color: #262626;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-color);
@@ -31,19 +28,6 @@
       justify-content: space-between;
       align-items: center;
       padding: 2rem 1rem;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    .spotlight {
-      pointer-events: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(196, 130, 63, 0.08), transparent 80%);
-      z-index: 1;
     }
 
     .container {
@@ -51,7 +35,6 @@
       max-width: 520px;
       margin: auto;
       text-align: center;
-      z-index: 2;
     }
 
     .status-badge {
@@ -85,13 +68,7 @@
       font-size: 0.85rem;
       color: #33ff33;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       cursor: text;
-    }
-
-    .terminal-window.drag-active {
-      border-color: var(--accent-color);
-      box-shadow: 0 0 20px rgba(196, 130, 63, 0.3);
     }
 
     .terminal-output {
@@ -110,10 +87,7 @@
       padding-top: 0.75rem;
     }
 
-    .prompt-symbol {
-      color: var(--accent-color);
-      font-weight: bold;
-    }
+    .prompt-symbol { color: var(--accent-color); font-weight: bold; }
 
     .terminal-input {
       background: transparent;
@@ -125,25 +99,11 @@
       font-size: 0.85rem;
     }
 
-    footer {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      z-index: 2;
-    }
-
-    footer a {
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
+    footer { font-size: 0.8rem; color: var(--text-muted); }
+    footer a { color: var(--text-muted); text-decoration: none; }
   </style>
 </head>
 <body>
-
-  <div class="spotlight" id="spotlight"></div>
 
   <div class="container">
     <div class="status-badge">
@@ -152,7 +112,7 @@
     </div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready.</div>
+      <div class="terminal-output" id="terminal-output">ready. Type a message or 'upload' to send a file.</div>
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
         <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
@@ -167,23 +127,6 @@
   <script>
     const WORKER_URL = 'https://codetel.behrouz-4b1.workers.dev';
 
-    function getSessionId() {
-      let id = localStorage.getItem('visitor_session_id');
-      if (!id) {
-        id = 'sess_' + Math.random().toString(36).substring(2, 10);
-        localStorage.setItem('visitor_session_id', id);
-      }
-      return id;
-    }
-
-    const sessionId = getSessionId();
-
-    const spotlight = document.getElementById('spotlight');
-    window.addEventListener('mousemove', (e) => {
-      spotlight.style.setProperty('--x', `${e.clientX}px`);
-      spotlight.style.setProperty('--y', `${e.clientY}px`);
-    });
-
     const termWindow = document.getElementById('terminal-window');
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
@@ -196,23 +139,7 @@
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
-    termWindow.addEventListener('click', () => {
-      termInput.focus();
-    });
-
-    // Poll for replies sent from Telegram every 2.5 seconds
-    setInterval(async () => {
-      try {
-        const res = await fetch(`${WORKER_URL}/get-replies?sessionId=${sessionId}`);
-        if (res.ok) {
-          const replies = await res.json();
-          replies.forEach(reply => {
-            termOutput.textContent += `\n\n[Behrouz]: ${reply}`;
-            termOutput.scrollTop = termOutput.scrollHeight;
-          });
-        }
-      } catch (e) {}
-    }, 2500);
+    termWindow.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
       termOutput.textContent += `\nSending...`;
@@ -222,11 +149,7 @@
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: msg,
-            contact: contactInfo || "Anonymous",
-            sessionId: sessionId
-          })
+          body: JSON.stringify({ message: msg, contact: contactInfo || "Anonymous" })
         });
 
         if (res.ok) {
@@ -237,26 +160,19 @@
       } catch (err) {
         termOutput.textContent += `\nNetwork error.`;
       }
-
       termOutput.scrollTop = termOutput.scrollHeight;
     }
 
-    async function processFile(file, method = "upload") {
+    async function sendFile(file) {
       if (!file) return;
-
-      termOutput.textContent += `\n\n> ${method}\nUploading [${file.name}]...`;
+      termOutput.textContent += `\n\nUploading [${file.name}]...`;
       termOutput.scrollTop = termOutput.scrollHeight;
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('sessionId', sessionId);
 
       try {
-        const res = await fetch(WORKER_URL, {
-          method: 'POST',
-          body: formData 
-        });
-
+        const res = await fetch(WORKER_URL, { method: 'POST', body: formData });
         if (res.ok) {
           termOutput.textContent += `\nDelivered.`;
         } else {
@@ -265,43 +181,17 @@
       } catch (err) {
         termOutput.textContent += `\nNetwork error.`;
       }
-      
       termOutput.scrollTop = termOutput.scrollHeight;
     }
 
     fileInput.addEventListener('change', (e) => {
-      processFile(e.target.files[0], "upload");
+      sendFile(e.target.files[0]);
       fileInput.value = '';
     });
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      window.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      window.addEventListener(eventName, () => {
-        termWindow.classList.add('drag-active');
-      }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      window.addEventListener(eventName, () => {
-        termWindow.classList.remove('drag-active');
-      }, false);
-    });
-
-    window.addEventListener('drop', (e) => {
-      const file = e.dataTransfer.files[0];
-      processFile(file, "drag_and_drop");
-    }, false);
 
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         const rawVal = termInput.value.trim();
-        
         if (!rawVal) return;
         termInput.value = '';
 
@@ -319,10 +209,8 @@
           userContact = rawVal;
           localStorage.setItem('visitor_handle', userContact);
           termOutput.textContent += `\n> ${userContact}`;
-          
           const msgToSend = pendingMessage;
           pendingMessage = '';
-          
           await sendMessage(msgToSend, userContact);
           return;
         }
