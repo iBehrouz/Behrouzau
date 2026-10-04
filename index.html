@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Behrouz</title>
+  <meta name="description" content="Personal and professional portal for Behrouz — Master craftsman specializing in bespoke architectural joinery and fine cabinetry across Australia.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            charcoal: {
+              950: '#090a0c',
+              900: '#111317',
+              800: '#1a1d24',
+              700: '#262a34',
+            },
+            amberAccent: {
+              400: '#d99b61',
+              500: '#c58548',
+              600: '#aa6d34',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(26, 29, 36, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .subtle-glow {
+      box-shadow: 0 0 50px -15px rgba(217, 155, 97, 0.15);
+    }
+    .grain-overlay {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="bg-charcoal-950 text-neutral-200 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-amberAccent-500 selection:text-white relative overflow-x-hidden">
+
+  <div class="fixed inset-0 pointer-events-none grain-overlay z-0"></div>
+  <div class="fixed -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-amberAccent-500/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+
+  <main class="relative z-10 w-full max-w-xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-center">
+    
+
+
+    <!-- Header & Personal Identity -->
+    <header class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight font-serif mb-2">Behrouz</h1>
+
+    </header>
+
+    <div class="w-full space-y-4 mb-10">
+
+      </a>
+
+      <!-- Direct Email Quick Contact Button -->
+      <a href="mailto:hello@behrouz.au" 
+         class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-amberAccent-500 to-amberAccent-600 hover:from-amberAccent-400 hover:to-amberAccent-500 text-charcoal-950 font-medium py-3.5 px-6 rounded-2xl shadow-lg transition-all duration-200 transform active:scale-[0.99]">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <span class="text-sm tracking-wide font-semibold">Send Direct Email</span>
+      </a>
+
+      <!-- Interactive Copy Email Trigger -->
+      <div class="glass-card rounded-2xl p-3 px-4 flex items-center justify-between text-xs text-neutral-400">
+        <span class="font-mono text-neutral-300">hello@behrouz.au</span>
+        <button id="copyBtn" onclick="copyAddress()" 
+                class="hover:text-white px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center space-x-1.5 cursor-pointer">
+          <span id="copyText">Copy</span>
+          <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+
+
+  </main>
+
+  <footer class="relative z-10 w-full text-center py-6 text-[11px] text-neutral-600 border-t border-white/5">
+    <p>&copy; 2026 Behrouz. All rights reserved. &bull; <a href="https://behrouz.au" class="hover:text-neutral-400 transition-colors">behrouz.au</a></p>
+  </footer>
+
+  <script>
+    function copyAddress() {
+      const email = 'hello@behrouz.au';
+      const input = document.createElement('input');
+      input.value = email;
+      document.body.appendChild(input);
+      input.select();
+      try {
+        document.execCommand('copy');
+        const copyText = document.getElementById('copyText');
+        const copyBtn = document.getElementById('copyBtn');
+        copyText.textContent = 'Copied!';
+        copyBtn.classList.add('text-emerald-400', 'border-emerald-500/30');
+        setTimeout(() => {
+          copyText.textContent = 'Copy';
+          copyBtn.classList.remove('text-emerald-400', 'border-emerald-500/30');
+        }, 2200);
+      } catch (err) {
+        console.error('Failed to copy', err);
+      } finally {
+        document.body.removeChild(input);
+      }
+    }
+  </script>
+</body>
+</html>
