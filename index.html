@@ -145,7 +145,7 @@
     </div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">Ready. Type "help"</div>
+      <div class="terminal-output" id="terminal-output">Ready.</div>
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
         <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
@@ -174,63 +174,37 @@
       termInput.focus();
     });
 
-    function getBotResponse(rawInput) {
-      const text = rawInput.toLowerCase().trim();
-
-      if (text === 'help') return 'Commands: about, status, clear, msg [text]';
-      if (text.includes('about') || text.includes('who')) return 'Minimalist web terminal by Behrouz.';
-      if (text.includes('status')) return 'System online.';
-      
-      return 'Unknown command. Type "help".';
-    }
-
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         const rawVal = termInput.value.trim();
-        const val = rawVal.toLowerCase();
         
         if (!rawVal) return;
         termInput.value = '';
 
-        if (val === 'clear') {
-          termOutput.textContent = '';
+        if (rawVal.toLowerCase() === 'clear') {
+          termOutput.textContent = 'Ready.';
           return;
         }
 
-        if (val.startsWith('msg ')) {
-          const userMsg = rawVal.substring(4).trim();
+        termOutput.textContent += `\n\n> ${rawVal}\nSending...`;
+        termWindow.scrollTop = termWindow.scrollHeight;
 
-          if (!userMsg) {
-            termOutput.textContent += `\n> ${rawVal}\nError: Message cannot be empty. Example: msg hello!`;
-            termWindow.scrollTop = termWindow.scrollHeight;
-            return;
+        try {
+          const res = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: rawVal })
+          });
+
+          if (res.ok) {
+            termOutput.textContent += `\nDelivered.`;
+          } else {
+            termOutput.textContent += `\nFailed.`;
           }
-
-          termOutput.textContent += `\n> ${rawVal}\nSending...`;
-
-          try {
-            const res = await fetch(WORKER_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message: userMsg })
-            });
-
-            if (res.ok) {
-              termOutput.textContent += `\nDelivered.`;
-            } else {
-              termOutput.textContent += `\nFailed.`;
-            }
-          } catch (err) {
-            termOutput.textContent += `\nNetwork error.`;
-          }
-
-          termWindow.scrollTop = termWindow.scrollHeight;
-          return;
+        } catch (err) {
+          termOutput.textContent += `\nNetwork error.`;
         }
 
-        termOutput.textContent += `\n\n> ${rawVal}`;
-        const reply = getBotResponse(rawVal);
-        termOutput.textContent += `\n${reply}`;
         termWindow.scrollTop = termWindow.scrollHeight;
       }
     });
