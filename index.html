@@ -86,9 +86,9 @@
       color: #33ff33;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      cursor: text;
     }
 
-    /* Highlight class for drag-and-drop */
     .terminal-window.drag-active {
       border-color: var(--accent-color);
       box-shadow: 0 0 20px rgba(196, 130, 63, 0.3);
@@ -152,7 +152,7 @@
     </div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">Ready.</div>
+      <div class="terminal-output" id="terminal-output">Ready. Type a message or drag & drop a file here.</div>
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
         <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
@@ -177,7 +177,7 @@
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
 
-    // Hidden file input for typing "upload"
+    // Hidden file input element
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.style.display = 'none';
@@ -187,12 +187,12 @@
       termInput.focus();
     });
 
-    // Core file upload function (handles both drag/drop and manual picking)
+    // Core file upload function
     async function processFile(file, method = "upload") {
       if (!file) return;
 
       termOutput.textContent += `\n\n> ${method}\nUploading [${file.name}]...`;
-      termWindow.scrollTop = termWindow.scrollHeight;
+      termOutput.scrollTop = termOutput.scrollHeight;
 
       const formData = new FormData();
       formData.append('file', file);
@@ -212,13 +212,13 @@
         termOutput.textContent += `\nNetwork error.`;
       }
       
-      termWindow.scrollTop = termWindow.scrollHeight;
+      termOutput.scrollTop = termOutput.scrollHeight;
     }
 
     // Handle Manual File Selection
     fileInput.addEventListener('change', (e) => {
       processFile(e.target.files[0], "upload");
-      fileInput.value = ''; // Reset input
+      fileInput.value = '';
     });
 
     // Handle Drag & Drop Events
@@ -255,7 +255,7 @@
         termInput.value = '';
 
         if (rawVal.toLowerCase() === 'clear') {
-          termOutput.textContent = 'Ready. Type "upload" or drag & drop a file here.';
+          termOutput.textContent = 'Ready. Type a message or drag & drop a file here.';
           return;
         }
 
@@ -265,7 +265,7 @@
         }
 
         termOutput.textContent += `\n\n> ${rawVal}\nSending...`;
-        termWindow.scrollTop = termWindow.scrollHeight;
+        termOutput.scrollTop = termOutput.scrollHeight;
 
         try {
           const res = await fetch(WORKER_URL, {
@@ -283,7 +283,7 @@
           termOutput.textContent += `\nNetwork error.`;
         }
 
-        termWindow.scrollTop = termWindow.scrollHeight;
+        termOutput.scrollTop = termOutput.scrollHeight;
       }
     });
   </script>
