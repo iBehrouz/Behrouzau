@@ -7,16 +7,17 @@
   <title>Behrouz</title>
   <style>
     :root {
-      --bg-color: #080808;
-      --card-bg: #121212;
+      --bg-color: #030303;
+      --card-bg: #090909;
       --accent-color: #c4823f;
+      --terminal-green: #33ff33;
       --text-main: #e0e0e0;
-      --text-muted: #777777;
-      --border-color: #222222;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --text-muted: #555555;
+      --border-color: #1c1c1c;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       background-color: var(--bg-color);
@@ -27,39 +28,54 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient mobile background bloom */
+    .ambient-glow {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80vw;
+      height: 80vw;
+      background: radial-gradient(circle, rgba(196, 130, 63, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .container {
       width: 100%;
-      max-width: 540px;
+      max-width: 480px;
       margin: auto;
       text-align: center;
+      position: relative;
+      z-index: 2;
     }
 
-    /* Subtle top accent line to balance the layout without a status bar */
     .top-glow-line {
-      width: 40px;
+      width: 36px;
       height: 2px;
       background: var(--accent-color);
-      margin: 0 auto 2.5rem auto;
-      box-shadow: 0 0 10px var(--accent-color);
-      opacity: 0.6;
+      margin: 0 auto 2rem auto;
+      box-shadow: 0 0 12px var(--accent-color);
+      opacity: 0.8;
     }
 
     .terminal-window {
-      background: #030303;
+      background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 1.4rem;
+      border-radius: 16px;
+      padding: 1.25rem;
       text-align: left;
       font-family: monospace;
-      font-size: 0.88rem;
-      color: #33ff33;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      font-size: 0.9rem;
+      color: var(--terminal-green);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
       cursor: text;
       position: relative;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .terminal-window.drag-active {
@@ -71,18 +87,19 @@
       margin-bottom: 1rem;
       white-space: pre-wrap;
       line-height: 1.6;
-      max-height: 320px;
+      max-height: 260px;
       overflow-y: auto;
+      text-shadow: 0 0 6px rgba(51, 255, 51, 0.25);
     }
 
-    /* Icon Guide Bar inside the terminal */
+    /* Contact icon bar optimized for mobile fingers */
     .contact-icons-bar {
       display: none;
-      gap: 12px;
-      font-size: 0.88rem;
-      padding: 6px 0 10px 0;
+      gap: 10px;
+      font-size: 0.82rem;
+      padding: 8px 0 10px 0;
       color: var(--accent-color);
-      border-top: 1px dashed #1c1c1c;
+      border-top: 1px dashed #1a1a1a;
       margin-bottom: 6px;
       flex-wrap: wrap;
     }
@@ -95,48 +112,46 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      border-top: 1px solid #1a1a1a;
-      padding-top: 0.85rem;
+      border-top: 1px solid #141414;
+      padding-top: 0.8rem;
     }
 
-    .prompt-symbol { color: var(--accent-color); font-weight: bold; }
+    .prompt-symbol { color: var(--accent-color); font-weight: bold; font-size: 1rem; }
 
+    /* 16px font size prevents iOS/Android from auto-zooming when focused */
     .terminal-input {
       background: transparent;
       border: none;
-      color: #33ff33;
+      color: var(--terminal-green);
       font-family: monospace;
       outline: none;
       width: 100%;
-      font-size: 0.9rem;
+      font-size: 16px; 
+      text-shadow: 0 0 6px rgba(51, 255, 51, 0.25);
     }
 
     footer { 
-      font-size: 0.75rem; 
+      font-size: 0.7rem; 
       color: var(--text-muted); 
       letter-spacing: 0.5px;
-      padding-top: 1.5rem;
-    }
-    footer a { color: var(--text-muted); text-decoration: none; }
-    footer a:hover { color: var(--accent-color); }
-
-    @media (max-width: 480px) {
-      body { padding: 1.5rem 0.75rem; }
-      .terminal-window { padding: 1.1rem; }
+      padding-top: 1rem;
+      position: relative;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
 
+  <div class="ambient-glow"></div>
+
   <div class="container">
     <div class="top-glow-line"></div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message</div>
+      <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
       
-      <!-- Contact Icon Bar -->
       <div class="contact-icons-bar" id="contactIconsBar">
-        <span>💬 @username</span> &nbsp;•&nbsp; <span>✉️ email</span> &nbsp;•&nbsp; <span>📞 number</span>
+        <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
       </div>
 
       <div class="terminal-input-line">
@@ -165,10 +180,6 @@
     fileInput.type = 'file';
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
-
-    if (!/Mobi|Android/i.test(navigator.userAgent)) {
-      termInput.focus();
-    }
 
     termWindow.addEventListener('click', () => termInput.focus());
 
@@ -219,30 +230,6 @@
       sendFile(e.target.files[0], "upload");
       fileInput.value = '';
     });
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      window.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      window.addEventListener(eventName, () => {
-        termWindow.classList.add('drag-active');
-      }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      window.addEventListener(eventName, () => {
-        termWindow.classList.remove('drag-active');
-      }, false);
-    });
-
-    window.addEventListener('drop', (e) => {
-      const file = e.dataTransfer.files[0];
-      sendFile(file, "drag_and_drop");
-    }, false);
 
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
