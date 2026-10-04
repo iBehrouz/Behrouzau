@@ -115,7 +115,7 @@
 
   <div class="container">
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">System Online. </div>
+      <div class="terminal-output" id="terminal-output">System Online. Behrouz's Terminal Awaiting Input.</div>
       
       <div class="contact-icons-bar" id="contactIconsBar">
         <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
@@ -142,8 +142,6 @@
 
     let userContact = localStorage.getItem('visitor_handle') || '';
     let pendingMessage = '';
-
-    // Keep track of chat history array for context memory
     let chatHistory = [];
 
     const fileInput = document.createElement('input');
@@ -154,7 +152,6 @@
     termWindow.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
-      // Add user message to local history
       chatHistory.push({ role: 'user', content: msg });
 
       termOutput.textContent += `\nThinking...`;
@@ -171,7 +168,6 @@
           const data = await res.json();
           const reply = data.reply || "Delivered.";
 
-          // Add AI reply to local history so it remembers next turn
           chatHistory.push({ role: 'assistant', content: reply });
 
           termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, ``);
@@ -243,7 +239,7 @@
 
         if (rawVal.toLowerCase() === 'clear') {
           termOutput.textContent = "System Online. Behrouz's Terminal Awaiting Input.";
-          chatHistory = []; // Reset memory on clear
+          chatHistory = [];
           contactIconsBar.classList.remove('visible');
           return;
         }
