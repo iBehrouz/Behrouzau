@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0c">
+  <meta name="theme-color" content="#060608">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Behrouz</title>
   <style>
     :root {
-      --bg-color: #0a0a0c;
-      --card-bg: #141418;
-      --accent-color: #ff5500; /* Vibrant Up-style orange energy */
+      --bg-color: #060608;
+      --card-bg: #0d0d11;
+      --accent-color: #c4823f;
       --terminal-green: #33ff33;
-      --text-main: #f4f4f6;
-      --text-muted: #888892;
-      --border-color: #22222a;
+      --text-main: #e0e0e0;
+      --text-muted: #666670;
+      --border-color: #1a1a22;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
@@ -28,97 +28,54 @@
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 1.25rem;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    /* App-like top brand header */
-    .app-header {
-      display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      padding: 0.5rem 0.25rem 1rem 0.25rem;
+      padding: 1rem;
     }
 
-    .brand-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #fff;
+    .container {
+      width: 100%;
+      max-width: 480px;
     }
 
-    .brand-title span {
-      color: var(--accent-color);
-    }
-
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 85, 0, 0.1);
-      border: 1px solid rgba(255, 85, 0, 0.2);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--accent-color);
-    }
-
-    .pulse-dot {
-      width: 6px;
-      height: 6px;
-      background-color: var(--accent-color);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-color);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
-    }
-
-    /* Main Terminal Card filling the mobile screen nicely */
-    .terminal-card {
+    .terminal-window {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      margin-bottom: 1rem;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      padding: 1.5rem;
+      text-align: left;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--terminal-green);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+      cursor: text;
       position: relative;
-      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .terminal-window.drag-active {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 30px rgba(196, 130, 63, 0.25);
     }
 
     .terminal-output {
-      flex: 1;
+      margin-bottom: 1.25rem;
       white-space: pre-wrap;
       line-height: 1.6;
-      font-family: monospace;
-      font-size: 0.88rem;
-      color: var(--terminal-green);
+      max-height: 320px;
       overflow-y: auto;
-      margin-bottom: 1rem;
       text-shadow: 0 0 6px rgba(51, 255, 51, 0.2);
     }
 
-    /* Contact icon options bar */
     .contact-icons-bar {
       display: none;
       gap: 12px;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       padding: 8px 0 12px 0;
       color: var(--accent-color);
-      border-top: 1px dashed #2a2a35;
+      border-top: 1px dashed #22222d;
       margin-bottom: 6px;
       flex-wrap: wrap;
-      font-family: monospace;
     }
 
     .contact-icons-bar.visible {
@@ -129,18 +86,13 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      border-top: 1px solid var(--border-color);
-      padding-top: 0.9rem;
+      border-top: 1px solid #16161f;
+      padding-top: 1rem;
     }
 
-    .prompt-symbol { 
-      color: var(--accent-color); 
-      font-weight: 800; 
-      font-family: monospace;
-      font-size: 1.1rem;
-    }
+    .prompt-symbol { color: var(--accent-color); font-weight: bold; font-size: 1.05rem; }
 
-    /* 16px prevents mobile auto-zoom */
+    /* 16px font size prevents iOS/Android from auto-zooming */
     .terminal-input {
       background: transparent;
       border: none;
@@ -148,7 +100,7 @@
       font-family: monospace;
       outline: none;
       width: 100%;
-      font-size: 16px; 
+      font-size: 16px;
       text-shadow: 0 0 6px rgba(51, 255, 51, 0.2);
     }
 
@@ -156,44 +108,37 @@
       text-align: center;
       font-size: 0.75rem; 
       color: var(--text-muted); 
-      padding-bottom: 0.5rem;
+      margin-top: 1.5rem;
       letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
 
-  <!-- App Header -->
-  <header class="app-header">
-    <div class="brand-title">behrouz<span>.</span>au</div>
-    <div class="live-badge">
-      <span class="pulse-dot"></span>
-      <span>ONLINE</span>
-    </div>
-  </header>
+  <div class="container">
+    <div class="terminal-window" id="terminal-window">
+      <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
+      
+      <!-- Contact Icon Bar -->
+      <div class="contact-icons-bar" id="contactIconsBar">
+        <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
+      </div>
 
-  <!-- Terminal Card Container -->
-  <div class="terminal-card" id="terminalCard">
-    <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
+      <div class="terminal-input-line">
+        <span class="prompt-symbol">&gt;</span>
+        <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
     
-    <div class="contact-icons-bar" id="contactIconsBar">
-      <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
-    </div>
-
-    <div class="terminal-input-line">
-      <span class="prompt-symbol">&gt;</span>
-      <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false">
-    </div>
+    <footer>
+      © 2026 Behrouz. All rights reserved.
+    </footer>
   </div>
-
-  <footer>
-    © 2026 • Secure Direct Channel
-  </footer>
 
   <script>
     const WORKER_URL = 'https://codetel.behrouz-4b1.workers.dev';
 
-    const terminalCard = document.getElementById('terminalCard');
+    const termWindow = document.getElementById('terminal-window');
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
     const contactIconsBar = document.getElementById('contactIconsBar');
@@ -206,7 +151,7 @@
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
-    terminalCard.addEventListener('click', () => termInput.focus());
+    termWindow.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
       termOutput.textContent += `\nSending...`;
@@ -260,6 +205,18 @@
       window.addEventListener(eventName, (e) => {
         e.preventDefault();
         e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.add('drag-active');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.remove('drag-active');
       }, false);
     });
 
