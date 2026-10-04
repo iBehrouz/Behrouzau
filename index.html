@@ -178,6 +178,7 @@
     const termOutput = document.getElementById('terminal-output');
 
     let userContact = localStorage.getItem('visitor_handle') || '';
+    let pendingMessage = '';
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -187,6 +188,32 @@
     termWindow.addEventListener('click', () => {
       termInput.focus();
     });
+
+    async function sendMessage(msg, contactInfo) {
+      termOutput.textContent += `\nSending...`;
+      termOutput.scrollTop = termOutput.scrollHeight;
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: msg,
+            contact: contactInfo || "Anonymous"
+          })
+        });
+
+        if (res.ok) {
+          termOutput.textContent += `\nDelivered.`;
+        } else {
+          termOutput.textContent += `\nFailed.`;
+        }
+      } catch (err) {
+        termOutput.textContent += `\nNetwork error.`;
+      }
+
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
 
     async function processFile(file, method = "upload") {
       if (!file) return;
@@ -261,37 +288,27 @@
           return;
         }
 
-        if (rawVal.toLowerCase().startsWith('setcontact ')) {
-          userContact = rawVal.replace(/^setcontact\s+/i, '').trim();
+        if (pendingMessage) {
+          userContact = rawVal;
           localStorage.setItem('visitor_handle', userContact);
-          termOutput.textContent += `\n\n> Contact set to: ${userContact}`;
+          termOutput.textContent += `\n> ${userContact}`;
+          
+          const msgToSend = pendingMessage;
+          pendingMessage = '';
+          
+          await sendMessage(msgToSend, userContact);
+          return;
+        }
+
+        if (!userContact) {
+          pendingMessage = rawVal;
+          termOutput.textContent += `\n\n> ${rawVal}\n@ or email or number:`;
           termOutput.scrollTop = termOutput.scrollHeight;
           return;
         }
 
-        termOutput.textContent += `\n\n> ${rawVal}\nSending...`;
-        termOutput.scrollTop = termOutput.scrollHeight;
-
-        try {
-          const res = await fetch(WORKER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              message: rawVal,
-              contact: userContact || "Not provided"
-            })
-          });
-
-          if (res.ok) {
-            termOutput.textContent += `\nDelivered.`;
-          } else {
-            termOutput.textContent += `\nFailed.`;
-          }
-        } catch (err) {
-          termOutput.textContent += `\nNetwork error.`;
-        }
-
-        termOutput.scrollTop = termOutput.scrollHeight;
+        termOutput.textContent += `\n\n> ${rawVal}`;
+        await sendMessage(rawVal, userContact);
       }
     });
   </script>
