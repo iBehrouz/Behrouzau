@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Behrouz</title>
   <style>
@@ -27,7 +27,7 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 3rem 1rem;
+      padding: 2rem 1rem;
     }
 
     .container {
@@ -37,33 +37,21 @@
       text-align: center;
     }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 0.5rem 1rem;
-      border-radius: 30px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      letter-spacing: 0.5px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #4CAF50;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #4CAF50;
+    /* Subtle top accent line to balance the layout without a status bar */
+    .top-glow-line {
+      width: 40px;
+      height: 2px;
+      background: var(--accent-color);
+      margin: 0 auto 2.5rem auto;
+      box-shadow: 0 0 10px var(--accent-color);
+      opacity: 0.6;
     }
 
     .terminal-window {
       background: #030303;
       border: 1px solid var(--border-color);
       border-radius: 14px;
-      padding: 1.5rem;
+      padding: 1.4rem;
       text-align: left;
       font-family: monospace;
       font-size: 0.88rem;
@@ -83,7 +71,7 @@
       margin-bottom: 1rem;
       white-space: pre-wrap;
       line-height: 1.6;
-      max-height: 340px;
+      max-height: 320px;
       overflow-y: auto;
     }
 
@@ -91,11 +79,12 @@
     .contact-icons-bar {
       display: none;
       gap: 12px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       padding: 6px 0 10px 0;
       color: var(--accent-color);
       border-top: 1px dashed #1c1c1c;
       margin-bottom: 6px;
+      flex-wrap: wrap;
     }
 
     .contact-icons-bar.visible {
@@ -119,37 +108,40 @@
       font-family: monospace;
       outline: none;
       width: 100%;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
     }
 
     footer { 
-      font-size: 0.8rem; 
+      font-size: 0.75rem; 
       color: var(--text-muted); 
       letter-spacing: 0.5px;
+      padding-top: 1.5rem;
     }
     footer a { color: var(--text-muted); text-decoration: none; }
     footer a:hover { color: var(--accent-color); }
+
+    @media (max-width: 480px) {
+      body { padding: 1.5rem 0.75rem; }
+      .terminal-window { padding: 1.1rem; }
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="status-badge">
-      <span class="status-dot"></span>
-      <span>behrouz.au • online</span>
-    </div>
+    <div class="top-glow-line"></div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message.</div>
+      <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
       
-      <!-- Icon bar that shows up when asking for contact info -->
+      <!-- Contact Icon Bar -->
       <div class="contact-icons-bar" id="contactIconsBar">
         <span>💬 @username</span> &nbsp;•&nbsp; <span>✉️ email</span> &nbsp;•&nbsp; <span>📞 number</span>
       </div>
 
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
-        <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
+        <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false">
       </div>
     </div>
   </div>
@@ -173,6 +165,10 @@
     fileInput.type = 'file';
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
+
+    if (!/Mobi|Android/i.test(navigator.userAgent)) {
+      termInput.focus();
+    }
 
     termWindow.addEventListener('click', () => termInput.focus());
 
@@ -224,7 +220,6 @@
       fileInput.value = '';
     });
 
-    // Drag and Drop File Handlers
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       window.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -279,7 +274,7 @@
 
         if (!userContact) {
           pendingMessage = rawVal;
-          contactIconsBar.classList.add('visible'); // Show icons bar
+          contactIconsBar.classList.add('visible');
           termOutput.textContent += `\n\n> ${rawVal}\nEnter your contact info:`;
           termOutput.scrollTop = termOutput.scrollHeight;
           return;
