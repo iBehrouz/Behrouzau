@@ -50,7 +50,6 @@
       box-shadow: 0 25px 50px rgba(0,0,0,0.8);
       cursor: text;
       position: relative;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .terminal-window.drag-active {
@@ -92,7 +91,6 @@
 
     .prompt-symbol { color: var(--accent-color); font-weight: bold; font-size: 1.05rem; }
 
-    /* 16px font size prevents iOS/Android from auto-zooming */
     .terminal-input {
       background: transparent;
       border: none;
@@ -117,9 +115,8 @@
 
   <div class="container">
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message.</div>
+      <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
       
-      <!-- Contact Icon Bar -->
       <div class="contact-icons-bar" id="contactIconsBar">
         <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
       </div>
@@ -154,7 +151,7 @@
     termWindow.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
-      termOutput.textContent += `\nSending...`;
+      termOutput.textContent += `\nThinking...`;
       termOutput.scrollTop = termOutput.scrollHeight;
 
       try {
@@ -165,12 +162,15 @@
         });
 
         if (res.ok) {
-          termOutput.textContent += `\nDelivered.`;
+          const data = await res.json();
+          // Remove "Thinking..." and append AI reply
+          termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, ``);
+          termOutput.textContent += `\n\n${data.reply || "Delivered."}`;
         } else {
-          termOutput.textContent += `\nFailed.`;
+          termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, `\nFailed.`);
         }
       } catch (err) {
-        termOutput.textContent += `\nNetwork error.`;
+        termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, `\nNetwork error.`);
       }
       termOutput.scrollTop = termOutput.scrollHeight;
     }
