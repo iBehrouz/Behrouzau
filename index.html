@@ -7,12 +7,12 @@
   <title>Behrouz</title>
   <style>
     :root {
-      --bg-color: #0d0d0d;
-      --card-bg: #161616;
+      --bg-color: #080808;
+      --card-bg: #121212;
       --accent-color: #c4823f;
       --text-main: #e0e0e0;
-      --text-muted: #888888;
-      --border-color: #262626;
+      --text-muted: #777777;
+      --border-color: #222222;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
@@ -27,12 +27,12 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 2rem 1rem;
+      padding: 3rem 1rem;
     }
 
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       margin: auto;
       text-align: center;
     }
@@ -40,14 +40,15 @@
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      letter-spacing: 0.5px;
     }
 
     .status-dot {
@@ -55,36 +56,58 @@
       height: 8px;
       background-color: #4CAF50;
       border-radius: 50%;
-      box-shadow: 0 0 8px #4CAF50;
+      box-shadow: 0 0 10px #4CAF50;
     }
 
     .terminal-window {
-      background: #050505;
+      background: #030303;
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 14px;
+      padding: 1.5rem;
       text-align: left;
       font-family: monospace;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #33ff33;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
       cursor: text;
+      position: relative;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .terminal-window.drag-active {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 25px rgba(196, 130, 63, 0.3);
     }
 
     .terminal-output {
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
       white-space: pre-wrap;
-      line-height: 1.5;
-      max-height: 320px;
+      line-height: 1.6;
+      max-height: 340px;
       overflow-y: auto;
+    }
+
+    /* Icon Guide Bar inside the terminal */
+    .contact-icons-bar {
+      display: none;
+      gap: 12px;
+      font-size: 0.9rem;
+      padding: 6px 0 10px 0;
+      color: var(--accent-color);
+      border-top: 1px dashed #1c1c1c;
+      margin-bottom: 6px;
+    }
+
+    .contact-icons-bar.visible {
+      display: flex;
     }
 
     .terminal-input-line {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       border-top: 1px solid #1a1a1a;
-      padding-top: 0.75rem;
+      padding-top: 0.85rem;
     }
 
     .prompt-symbol { color: var(--accent-color); font-weight: bold; }
@@ -96,11 +119,16 @@
       font-family: monospace;
       outline: none;
       width: 100%;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
     }
 
-    footer { font-size: 0.8rem; color: var(--text-muted); }
+    footer { 
+      font-size: 0.8rem; 
+      color: var(--text-muted); 
+      letter-spacing: 0.5px;
+    }
     footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--accent-color); }
   </style>
 </head>
 <body>
@@ -108,11 +136,17 @@
   <div class="container">
     <div class="status-badge">
       <span class="status-dot"></span>
-      <span>Behrouz</span>
+      <span>behrouz.au • online</span>
     </div>
 
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message or 'upload' to send a file.</div>
+      <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drag & drop files here.</div>
+      
+      <!-- Icon bar that shows up when asking for contact info -->
+      <div class="contact-icons-bar" id="contactIconsBar">
+        <span>💬 @username</span> &nbsp;•&nbsp; <span>✉️ email</span> &nbsp;•&nbsp; <span>📞 number</span>
+      </div>
+
       <div class="terminal-input-line">
         <span class="prompt-symbol">&gt;</span>
         <input type="text" class="terminal-input" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
@@ -121,7 +155,7 @@
   </div>
 
   <footer>
-    © 2026 Behrouz. All rights reserved. • <a href="https://behrouz.au">behrouz.au</a>
+    © 2026 Behrouz. All rights reserved.
   </footer>
 
   <script>
@@ -130,6 +164,7 @@
     const termWindow = document.getElementById('terminal-window');
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
+    const contactIconsBar = document.getElementById('contactIconsBar');
 
     let userContact = localStorage.getItem('visitor_handle') || '';
     let pendingMessage = '';
@@ -163,9 +198,9 @@
       termOutput.scrollTop = termOutput.scrollHeight;
     }
 
-    async function sendFile(file) {
+    async function sendFile(file, method = "upload") {
       if (!file) return;
-      termOutput.textContent += `\n\nUploading [${file.name}]...`;
+      termOutput.textContent += `\n\n> ${method}\nUploading [${file.name}]...`;
       termOutput.scrollTop = termOutput.scrollHeight;
 
       const formData = new FormData();
@@ -185,9 +220,34 @@
     }
 
     fileInput.addEventListener('change', (e) => {
-      sendFile(e.target.files[0]);
+      sendFile(e.target.files[0], "upload");
       fileInput.value = '';
     });
+
+    // Drag and Drop File Handlers
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.add('drag-active');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.remove('drag-active');
+      }, false);
+    });
+
+    window.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      sendFile(file, "drag_and_drop");
+    }, false);
 
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
@@ -197,6 +257,7 @@
 
         if (rawVal.toLowerCase() === 'clear') {
           termOutput.textContent = 'ready.';
+          contactIconsBar.classList.remove('visible');
           return;
         }
 
@@ -208,6 +269,7 @@
         if (pendingMessage) {
           userContact = rawVal;
           localStorage.setItem('visitor_handle', userContact);
+          contactIconsBar.classList.remove('visible');
           termOutput.textContent += `\n> ${userContact}`;
           const msgToSend = pendingMessage;
           pendingMessage = '';
@@ -217,7 +279,8 @@
 
         if (!userContact) {
           pendingMessage = rawVal;
-          termOutput.textContent += `\n\n> ${rawVal}\n@ or email or number:`;
+          contactIconsBar.classList.add('visible'); // Show icons bar
+          termOutput.textContent += `\n\n> ${rawVal}\nEnter your contact info:`;
           termOutput.scrollTop = termOutput.scrollHeight;
           return;
         }
