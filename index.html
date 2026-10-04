@@ -115,7 +115,7 @@
 
   <div class="container">
     <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message.</div>
+      <div class="terminal-output" id="terminal-output">System Online. </div>
       
       <div class="contact-icons-bar" id="contactIconsBar">
         <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
@@ -143,6 +143,9 @@
     let userContact = localStorage.getItem('visitor_handle') || '';
     let pendingMessage = '';
 
+    // Keep track of chat history array for context memory
+    let chatHistory = [];
+
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.style.display = 'none';
@@ -151,6 +154,9 @@
     termWindow.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
+      // Add user message to local history
+      chatHistory.push({ role: 'user', content: msg });
+
       termOutput.textContent += `\nThinking...`;
       termOutput.scrollTop = termOutput.scrollHeight;
 
@@ -158,14 +164,18 @@
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, contact: contactInfo || "Anonymous" })
+          body: JSON.stringify({ messages: chatHistory, contact: contactInfo || "Anonymous" })
         });
 
         if (res.ok) {
           const data = await res.json();
-          // Remove "Thinking..." and append AI reply
+          const reply = data.reply || "Delivered.";
+
+          // Add AI reply to local history so it remembers next turn
+          chatHistory.push({ role: 'assistant', content: reply });
+
           termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, ``);
-          termOutput.textContent += `\n\n${data.reply || "Delivered."}`;
+          termOutput.textContent += `\n\n${reply}`;
         } else {
           termOutput.textContent = termOutput.textContent.replace(`\nThinking...`, `\nFailed.`);
         }
@@ -232,7 +242,8 @@
         termInput.value = '';
 
         if (rawVal.toLowerCase() === 'clear') {
-          termOutput.textContent = 'ready.';
+          termOutput.textContent = "System Online. Behrouz's Terminal Awaiting Input.";
+          chatHistory = []; // Reset memory on clear
           contactIconsBar.classList.remove('visible');
           return;
         }
