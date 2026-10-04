@@ -167,6 +167,13 @@
   <script>
     const WORKER_URL = 'https://codetel.behrouz-4b1.workers.dev';
 
+    // Unique session ID per visitor browser session
+    let sessionId = localStorage.getItem('visitor_session_id');
+    if (!sessionId) {
+      sessionId = 'sess_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('visitor_session_id', sessionId);
+    }
+
     const spotlight = document.getElementById('spotlight');
     window.addEventListener('mousemove', (e) => {
       spotlight.style.setProperty('--x', `${e.clientX}px`);
@@ -189,6 +196,20 @@
       termInput.focus();
     });
 
+    // Check for incoming replies from Telegram every 3 seconds
+    setInterval(async () => {
+      try {
+        const res = await fetch(`${WORKER_URL}/get-replies?sessionId=${sessionId}`);
+        if (res.ok) {
+          const replies = await res.json();
+          replies.forEach(reply => {
+            termOutput.textContent += `\n\n[Behrouz]: ${reply}`;
+            termOutput.scrollTop = termOutput.scrollHeight;
+          });
+        }
+      } catch (e) {}
+    }, 3000);
+
     async function sendMessage(msg, contactInfo) {
       termOutput.textContent += `\nSending...`;
       termOutput.scrollTop = termOutput.scrollHeight;
@@ -199,7 +220,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             message: msg,
-            contact: contactInfo || "Anonymous"
+            contact: contactInfo || "Anonymous",
+            sessionId: sessionId
           })
         });
 
@@ -223,6 +245,7 @@
 
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('sessionId', sessionId);
 
       try {
         const res = await fetch(WORKER_URL, {
