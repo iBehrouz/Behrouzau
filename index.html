@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0c">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Behrouz</title>
   <style>
     :root {
-      --bg-color: #030303;
-      --card-bg: #090909;
-      --accent-color: #c4823f;
+      --bg-color: #0a0a0c;
+      --card-bg: #141418;
+      --accent-color: #ff5500; /* Vibrant Up-style orange energy */
       --terminal-green: #33ff33;
-      --text-main: #e0e0e0;
-      --text-muted: #555555;
-      --border-color: #1c1c1c;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      --text-main: #f4f4f6;
+      --text-muted: #888892;
+      --border-color: #22222a;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -24,84 +25,100 @@
       color: var(--text-main);
       font-family: var(--font-family);
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      padding: 1.25rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* App-like top brand header */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 1.5rem 1rem;
-      position: relative;
-      overflow-x: hidden;
+      padding: 0.5rem 0.25rem 1rem 0.25rem;
     }
 
-    /* Ambient mobile background bloom */
-    .ambient-glow {
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80vw;
-      height: 80vw;
-      background: radial-gradient(circle, rgba(196, 130, 63, 0.08) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 1;
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
     }
 
-    .container {
-      width: 100%;
-      max-width: 480px;
-      margin: auto;
-      text-align: center;
-      position: relative;
-      z-index: 2;
+    .brand-title span {
+      color: var(--accent-color);
     }
 
-    .top-glow-line {
-      width: 36px;
-      height: 2px;
-      background: var(--accent-color);
-      margin: 0 auto 2rem auto;
-      box-shadow: 0 0 12px var(--accent-color);
-      opacity: 0.8;
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 85, 0, 0.1);
+      border: 1px solid rgba(255, 85, 0, 0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-color);
     }
 
-    .terminal-window {
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-color);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-color);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* Main Terminal Card filling the mobile screen nicely */
+    .terminal-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 1.25rem;
-      text-align: left;
-      font-family: monospace;
-      font-size: 0.9rem;
-      color: var(--terminal-green);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
-      cursor: text;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      margin-bottom: 1rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
       position: relative;
-    }
-
-    .terminal-window.drag-active {
-      border-color: var(--accent-color);
-      box-shadow: 0 0 25px rgba(196, 130, 63, 0.3);
+      overflow: hidden;
     }
 
     .terminal-output {
-      margin-bottom: 1rem;
+      flex: 1;
       white-space: pre-wrap;
       line-height: 1.6;
-      max-height: 260px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      color: var(--terminal-green);
       overflow-y: auto;
-      text-shadow: 0 0 6px rgba(51, 255, 51, 0.25);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 6px rgba(51, 255, 51, 0.2);
     }
 
-    /* Contact icon bar optimized for mobile fingers */
+    /* Contact icon options bar */
     .contact-icons-bar {
       display: none;
-      gap: 10px;
-      font-size: 0.82rem;
-      padding: 8px 0 10px 0;
+      gap: 12px;
+      font-size: 0.85rem;
+      padding: 8px 0 12px 0;
       color: var(--accent-color);
-      border-top: 1px dashed #1a1a1a;
+      border-top: 1px dashed #2a2a35;
       margin-bottom: 6px;
       flex-wrap: wrap;
+      font-family: monospace;
     }
 
     .contact-icons-bar.visible {
@@ -112,13 +129,18 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      border-top: 1px solid #141414;
-      padding-top: 0.8rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.9rem;
     }
 
-    .prompt-symbol { color: var(--accent-color); font-weight: bold; font-size: 1rem; }
+    .prompt-symbol { 
+      color: var(--accent-color); 
+      font-weight: 800; 
+      font-family: monospace;
+      font-size: 1.1rem;
+    }
 
-    /* 16px font size prevents iOS/Android from auto-zooming when focused */
+    /* 16px prevents mobile auto-zoom */
     .terminal-input {
       background: transparent;
       border: none;
@@ -127,48 +149,51 @@
       outline: none;
       width: 100%;
       font-size: 16px; 
-      text-shadow: 0 0 6px rgba(51, 255, 51, 0.25);
+      text-shadow: 0 0 6px rgba(51, 255, 51, 0.2);
     }
 
     footer { 
-      font-size: 0.7rem; 
+      text-align: center;
+      font-size: 0.75rem; 
       color: var(--text-muted); 
+      padding-bottom: 0.5rem;
       letter-spacing: 0.5px;
-      padding-top: 1rem;
-      position: relative;
-      z-index: 2;
     }
   </style>
 </head>
 <body>
 
-  <div class="ambient-glow"></div>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-title">behrouz<span>.</span>au</div>
+    <div class="live-badge">
+      <span class="pulse-dot"></span>
+      <span>ONLINE</span>
+    </div>
+  </header>
 
-  <div class="container">
-    <div class="top-glow-line"></div>
+  <!-- Terminal Card Container -->
+  <div class="terminal-card" id="terminalCard">
+    <div class="terminal-output" id="terminal-output">ready. Type a message, type 'upload', or drop files here.</div>
+    
+    <div class="contact-icons-bar" id="contactIconsBar">
+      <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
+    </div>
 
-    <div class="terminal-window" id="terminal-window">
-      <div class="terminal-output" id="terminal-output">ready. Type a message.</div>
-      
-      <div class="contact-icons-bar" id="contactIconsBar">
-        <span>💬 @username</span> &nbsp;•&nbsp; <span>✉ email</span> &nbsp;•&nbsp; <span>📞 number</span>
-      </div>
-
-      <div class="terminal-input-line">
-        <span class="prompt-symbol">&gt;</span>
-        <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false">
-      </div>
+    <div class="terminal-input-line">
+      <span class="prompt-symbol">&gt;</span>
+      <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false">
     </div>
   </div>
 
   <footer>
-    © 2026 Behrouz. All rights reserved.
+    © 2026 • Secure Direct Channel
   </footer>
 
   <script>
     const WORKER_URL = 'https://codetel.behrouz-4b1.workers.dev';
 
-    const termWindow = document.getElementById('terminal-window');
+    const terminalCard = document.getElementById('terminalCard');
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
     const contactIconsBar = document.getElementById('contactIconsBar');
@@ -181,7 +206,7 @@
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
-    termWindow.addEventListener('click', () => termInput.focus());
+    terminalCard.addEventListener('click', () => termInput.focus());
 
     async function sendMessage(msg, contactInfo) {
       termOutput.textContent += `\nSending...`;
@@ -230,6 +255,18 @@
       sendFile(e.target.files[0], "upload");
       fileInput.value = '';
     });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    window.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      sendFile(file, "drag_and_drop");
+    }, false);
 
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
