@@ -85,6 +85,13 @@
       font-size: 0.85rem;
       color: #33ff33;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Highlight class for drag-and-drop */
+    .terminal-window.drag-active {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 20px rgba(196, 130, 63, 0.3);
     }
 
     .terminal-output {
@@ -170,10 +177,76 @@
     const termInput = document.getElementById('terminal-input');
     const termOutput = document.getElementById('terminal-output');
 
+    // Hidden file input for typing "upload"
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
     termWindow.addEventListener('click', () => {
       termInput.focus();
     });
 
+    // Core file upload function (handles both drag/drop and manual picking)
+    async function processFile(file, method = "upload") {
+      if (!file) return;
+
+      termOutput.textContent += `\n\n> ${method}\nUploading [${file.name}]...`;
+      termWindow.scrollTop = termWindow.scrollHeight;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          body: formData 
+        });
+
+        if (res.ok) {
+          termOutput.textContent += `\nFile delivered.`;
+        } else {
+          termOutput.textContent += `\nFile failed to send.`;
+        }
+      } catch (err) {
+        termOutput.textContent += `\nNetwork error.`;
+      }
+      
+      termWindow.scrollTop = termWindow.scrollHeight;
+    }
+
+    // Handle Manual File Selection
+    fileInput.addEventListener('change', (e) => {
+      processFile(e.target.files[0], "upload");
+      fileInput.value = ''; // Reset input
+    });
+
+    // Handle Drag & Drop Events
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.add('drag-active');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      window.addEventListener(eventName, () => {
+        termWindow.classList.remove('drag-active');
+      }, false);
+    });
+
+    window.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      processFile(file, "drag_and_drop");
+    }, false);
+
+    // Handle Text Input
     termInput.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         const rawVal = termInput.value.trim();
@@ -182,7 +255,12 @@
         termInput.value = '';
 
         if (rawVal.toLowerCase() === 'clear') {
-          termOutput.textContent = 'Ready.';
+          termOutput.textContent = 'Ready. Type "upload" or drag & drop a file here.';
+          return;
+        }
+
+        if (rawVal.toLowerCase() === 'upload') {
+          fileInput.click();
           return;
         }
 
